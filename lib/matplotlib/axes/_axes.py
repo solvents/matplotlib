@@ -6651,6 +6651,99 @@ class Axes(_AxesBase):
                                                  integer=True))
         return im
 
+
+    def violinplot(self, x, positions=None, widths=0.5):
+        """
+        Make a violin plot.
+
+        Call signature::
+
+          violinplot(x, positions=None)
+
+        Make a violin plot for each column of *x* or each
+        vector in sequence *x*.  Each filled area extends to represent the
+        entire data range, with three lines at the mean, the minimum, and
+        the maximum.
+
+        Parameters
+        ----------
+
+          x : Array or a sequence of vectors.
+            The input data.
+
+          positions : array-like, default = [1, 2, ..., n]
+            Sets the positions of the violins. The ticks and limits are
+            automatically set to match the positions.
+
+          widths : array-like, default = 0.5
+            Either a scalar or a vector that sets the maximal width of
+            each violin. The default is 0.5, which uses about half of the
+            available horizontal space.
+
+        Returns
+        -------
+
+        A dictionary mapping each component of the violinplot to a list of the
+        :class:`matplotlib.artist.Artist` instances created. The dictionary has
+        the following keys:
+
+            - patches: A list of the 
+              :class:`matplotlib.collections.PolyCollection` containing the 
+              filled area of the violinplot.
+            - means: The lines identifying the mean values for each of the
+              violins.
+            - caps: The lines identifying the extremal values of each violin's
+              data set.
+
+        """
+
+        patches = []
+        means = []
+        caps = []
+
+        if positions == None:
+            positions = range(1, len(x) + 1)
+
+        # TODO: Use kde estimation function on x
+        # These numbers are contrived
+        coords = np.arange(0.0, np.pi, np.pi/100.)
+        datasets = [np.sin(coords), (np.sin(coords)) ** 2]
+        positions = [1, 2]
+        # Calculate max and min
+        if len(datasets) == 0:
+            return {
+                'patches' : patches,
+                'means' : means,
+                'caps' : caps
+            }
+
+        m, M = None, None
+        for d in datasets:
+            if not m or m > d.min():
+                m = d.min()
+            if not M or M < d.max():
+                M = d.max()
+        
+        for d,x in zip(datasets,positions):
+            # Since each data point p is plotted from x-p to x+p,
+            # we need to scale it by an additional 0.5 factor so that we get
+            # correct width in the end.
+            d = 0.5 * widths * d/d.max()
+            m = d.min()
+            M = d.max()
+            patches += [self.fill_betweenx(np.arange(m,M,(M-m)/100.),
+                                           -d+x,
+                                           d+x,
+                                           facecolor='y',
+                                           alpha=0.3)]
+
+        return {
+            'patches' : patches,
+            'means' : means,
+            'caps' : caps
+        }
+
+
     def tricontour(self, *args, **kwargs):
         return mtri.tricontour(self, *args, **kwargs)
     tricontour.__doc__ = mtri.TriContourSet.tricontour_doc
