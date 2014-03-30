@@ -3708,21 +3708,30 @@ def ksdensity(dataset, bw_method=None):
 
     Returns
     -------
-    xmin : number
-        The min of the input dataset
-    xmax : number
-        The max of the input dataset
-    result: (# of points,)-array
-        The array of the evaluated PDF estimation
+    A dictionary mapping each various aspects of the computed KDE.
+    The dictionary has the following keys:
+
+        xmin : number
+            The min of the input dataset
+        xmax : number
+            The max of the input dataset
+        mean : number
+            The mean of the result
+        median: number
+            The median of the result
+        result: (# of points,)-array
+            The array of the evaluated PDF estimation
 
     Raises
     ------
     ValueError : if the dimensionality of the input points is different than
                  the dimensionality of the KDE.
 
-    (Courtesy of SciPy)                 
     """
-    
+
+    # This implementation with minor modification was too good to pass up.
+    # from scipy: https://github.com/scipy/scipy/blob/master/scipy/stats/kde.py 
+
     dataset = np.atleast_2d(dataset)
     xmin = dataset.min()
     xmax = dataset.max()
@@ -3800,7 +3809,13 @@ def ksdensity(dataset, bw_method=None):
 
     result = result / norm_factor
 
-    return xmin, xmax, result
+    return {
+        'xmin' : xmin,
+        'xmax' : xmax,
+        'mean' : np.mean(result),
+        'median' : np.median(result),
+        'result' : result
+    }
 
 ##################################################
 # Code related to things in and around polygons
