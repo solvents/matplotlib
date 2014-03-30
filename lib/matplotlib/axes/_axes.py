@@ -6652,7 +6652,7 @@ class Axes(_AxesBase):
         return im
 
 
-    def violinplot(self, x, positions=None, widths=0.5):
+    def violinplot(self, x, positions=None, width=0.5):
         """
         Make a violin plot.
 
@@ -6675,7 +6675,7 @@ class Axes(_AxesBase):
             Sets the positions of the violins. The ticks and limits are
             automatically set to match the positions.
 
-          widths : array-like, default = 0.5
+          width : array-like, default = 0.5
             Either a scalar or a vector that sets the maximal width of
             each violin. The default is 0.5, which uses about half of the
             available horizontal space.
@@ -6684,61 +6684,50 @@ class Axes(_AxesBase):
         -------
 
         A dictionary mapping each component of the violinplot to a list of the
-        :class:`matplotlib.artist.Artist` instances created. The dictionary has
+        corresponding collection instances created. The dictionary has
         the following keys:
 
-            - patches: A list of the 
-              :class:`matplotlib.collections.PolyCollection` containing the 
-              filled area of the violinplot.
-            - means: The lines identifying the mean values for each of the
-              violins.
-            - caps: The lines identifying the extremal values of each violin's
+            - bodies: A list of the 
+              :class:`matplotlib.collections.PolyCollection` instances
+              containing the filled area of each violin.
+            - means: A list of the :class:`matplotlib.lines.Line2D` instances
+              created to identify the mean values for each of the violins.
+            - caps: A list of the :class:`matplotlib.lines.Line2D` instances
+              created to identify the extremal values of each violin's
               data set.
 
         """
 
-        patches = []
+        bodies = []
         means = []
         caps = []
 
         if positions == None:
             positions = range(1, len(x) + 1)
+        elif len(positions) != len(x):
+            raise ValueError(datashape_message.format("positions"))
 
         # TODO: Use kde estimation function on x
         # These numbers are contrived
         coords = np.arange(0.0, np.pi, np.pi/100.)
-        datasets = [np.sin(coords), (np.sin(coords)) ** 2]
-        positions = [1, 2]
-        # Calculate max and min
-        if len(datasets) == 0:
-            return {
-                'patches' : patches,
-                'means' : means,
-                'caps' : caps
-            }
-
-        m, M = None, None
-        for d in datasets:
-            if not m or m > d.min():
-                m = d.min()
-            if not M or M < d.max():
-                M = d.max()
+        datasets = map(lambda i: np.sin(coords) ** i, range(1,len(x) + 1))
         
         for d,x in zip(datasets,positions):
             # Since each data point p is plotted from x-p to x+p,
             # we need to scale it by an additional 0.5 factor so that we get
             # correct width in the end.
             d = 0.5 * widths * d/d.max()
-            m = d.min()
-            M = d.max()
-            patches += [self.fill_betweenx(np.arange(m,M,(M-m)/100.),
-                                           -d+x,
-                                           d+x,
-                                           facecolor='y',
-                                           alpha=0.3)]
+            m = d.min() # This should actually be the min for the dataset
+            M = d.max() # likewise
+            # bodies += [self.fill_betweenx(np.arange(m,M,(M-m)/100.),
+            bodies += [self.fill_betweenx(coords,
+                                          -d+x,
+                                          d+x,
+                                          facecolor='y',
+                                          alpha=0.3)]
 
         return {
-            'patches' : patches,
+            'bodies' : bodies,
             'means' : means,
             'caps' : caps
         }
