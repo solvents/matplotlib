@@ -6708,7 +6708,7 @@ class Axes(_AxesBase):
 
         for d,p in zip(dataset,positions):            
             # Calculate the kernel density
-            m, M, v = mlab.ksdensity(d, 'silverman') 
+            m, M, v = mlab.ksdensity(d)
             coords = np.arange(m,M,(M-m)/100.)
 
             # Since each data point p is plotted from v-p to v+p,

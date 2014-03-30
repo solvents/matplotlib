@@ -3719,6 +3719,8 @@ def ksdensity(dataset, bw_method=None):
     ------
     ValueError : if the dimensionality of the input points is different than
                  the dimensionality of the KDE.
+
+    (Courtesy of SciPy)                 
     """
     
     dataset = np.atleast_2d(dataset)
