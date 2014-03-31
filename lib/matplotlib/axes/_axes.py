@@ -6651,7 +6651,8 @@ class Axes(_AxesBase):
                                                  integer=True))
         return im
 
-    def violinplot(self, dataset, positions=None, width=0.5):
+    def violinplot(self, dataset, positions=None, widths=0.5, showmeans=False,
+                   showextrema=True, showmedians=False):
         """
         Make a violin plot.
 
@@ -6674,10 +6675,19 @@ class Axes(_AxesBase):
             Sets the positions of the violins. The ticks and limits are
             automatically set to match the positions.
 
-          width : array-like, default = 0.5
+          widths : array-like, default = 0.5
             Either a scalar or a vector that sets the maximal width of
             each violin. The default is 0.5, which uses about half of the
             available horizontal space.
+
+          showmeans : bool, default = False
+            If true, will toggle rendering of the means
+
+          showextrema : bool, default = True
+            If true, will toggle rendering of the extrema
+
+          showmedians : bool, default False
+            If true, will toggle rendering of the medians
 
         Returns
         -------
@@ -6699,16 +6709,27 @@ class Axes(_AxesBase):
 
         bodies = []
         means = []
-        caps = []
         mins = []
         maxes = []
+        medians = []
 
+        # Validate positions
         if positions == None:
             positions = range(1, len(dataset) + 1)
         elif len(positions) != len(dataset):
             raise ValueError(datashape_message.format("positions"))
 
-        for d,p in zip(dataset,positions):            
+        # Validate widths
+        if np.isscalar(widths):
+            widths = [widths] * len(dataset)
+        elif len(widths) != len(dataset):
+            raise ValueError(datashape_message.format("widths"))
+
+        # Calculate mins and maxes for statistics lines
+        pmins = -0.25 * np.array(widths) + positions
+        pmaxes = 0.25 * np.array(widths) + positions
+
+        for d,p,w in zip(dataset,positions,widths):            
             # Calculate the kernel density
             kde = mlab.ksdensity(d)
             m = kde['xmin']
@@ -6721,7 +6742,7 @@ class Axes(_AxesBase):
             # Since each data point p is plotted from v-p to v+p,
             # we need to scale it by an additional 0.5 factor so that we get
             # correct width in the end.
-            v = 0.5 * width * v/v.max()
+            v = 0.5 * w * v/v.max()
 
             bodies += [self.fill_betweenx(coords,
                                           -v+p,
@@ -6732,18 +6753,20 @@ class Axes(_AxesBase):
             means.append(mean)
             mins.append(m)
             maxes.append(M)
+            medians.append(median)
 
-        pmins = map (lambda x: x - width*0.25, positions)
-        pmaxes = map (lambda x: x + width*0.25, positions)
-        mc = self.hlines(means, pmins, pmaxes, colors='r')
-        mx = self.hlines(maxes, pmins, pmaxes, colors='r')
-        mn = self.hlines(mins, pmins, pmaxes, colors='r')
-        sticks = self.vlines(positions, mins, maxes, colors='r')
+        if showmeans:
+            mc = self.hlines(means, pmins, pmaxes, colors='r')
+        if showextrema:
+            mx = self.hlines(maxes, pmins, pmaxes, colors='r')
+            mn = self.hlines(mins, pmins, pmaxes, colors='r')
+            sticks = self.vlines(positions, mins, maxes, colors='r')
+        if showmedians:
+            md = self.hlines(medians, pmins, pmaxes, colors='r')
 
         return {
             'bodies' : bodies,
-            'means' : means,
-            'caps' : caps
+            'means' : means
         }
 
 
