@@ -3812,8 +3812,8 @@ def ksdensity(dataset, bw_method=None):
     return {
         'xmin' : xmin,
         'xmax' : xmax,
-        'mean' : np.mean(result),
-        'median' : np.median(result),
+        'mean' : np.mean(dataset),
+        'median' : np.median(dataset),
         'result' : result
     }
 
