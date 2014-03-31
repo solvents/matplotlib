@@ -6729,6 +6729,12 @@ class Axes(_AxesBase):
         pmins = -0.25 * np.array(widths) + positions
         pmaxes = 0.25 * np.array(widths) + positions
 
+        # Check hold status
+        if not self._hold:
+            self.cla()
+        holdStatus = self._hold
+
+        # Render violins
         for d,p,w in zip(dataset,positions,widths):            
             # Calculate the kernel density
             kde = mlab.ksdensity(d)
@@ -6755,14 +6761,22 @@ class Axes(_AxesBase):
             maxes.append(M)
             medians.append(median)
 
+        # Render means
         if showmeans:
             mc = self.hlines(means, pmins, pmaxes, colors='r')
+
+        # Render extrema
         if showextrema:
             mx = self.hlines(maxes, pmins, pmaxes, colors='r')
             mn = self.hlines(mins, pmins, pmaxes, colors='r')
             sticks = self.vlines(positions, mins, maxes, colors='r')
+
+        # Render medians
         if showmedians:
             md = self.hlines(medians, pmins, pmaxes, colors='r')
+
+        # Reset hold
+        self.hold(holdStatus)
 
         return {
             'bodies' : bodies,
