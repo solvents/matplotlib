@@ -6700,6 +6700,8 @@ class Axes(_AxesBase):
         bodies = []
         means = []
         caps = []
+        mins = []
+        maxes = []
 
         if positions == None:
             positions = range(1, len(dataset) + 1)
@@ -6726,6 +6728,17 @@ class Axes(_AxesBase):
                                           v+p,
                                           facecolor='y',
                                           alpha=0.3)]
+
+            means.append(mean)
+            mins.append(m)
+            maxes.append(M)
+
+        pmins = map (lambda x: x - width*0.25, positions)
+        pmaxes = map (lambda x: x + width*0.25, positions)
+        mc = self.hlines(means, pmins, pmaxes, colors='r')
+        mx = self.hlines(maxes, pmins, pmaxes, colors='r')
+        mn = self.hlines(mins, pmins, pmaxes, colors='r')
+        sticks = self.vlines(positions, mins, maxes, colors='r')
 
         return {
             'bodies' : bodies,
