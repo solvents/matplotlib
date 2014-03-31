@@ -6681,13 +6681,13 @@ class Axes(_AxesBase):
             available horizontal space.
 
           showmeans : bool, default = False
-            If true, will toggle rendering of the means
+            If true, will toggle rendering of the means.
 
           showextrema : bool, default = True
-            If true, will toggle rendering of the extrema
+            If true, will toggle rendering of the extrema.
 
-          showmedians : bool, default False
-            If true, will toggle rendering of the medians
+          showmedians : bool, default = False
+            If true, will toggle rendering of the medians.
 
         Returns
         -------
@@ -6699,19 +6699,34 @@ class Axes(_AxesBase):
             - bodies: A list of the 
               :class:`matplotlib.collections.PolyCollection` instances
               containing the filled area of each violin.
-            - means: A list of the :class:`matplotlib.lines.Line2D` instances
-              created to identify the mean values for each of the violins.
-            - caps: A list of the :class:`matplotlib.lines.Line2D` instances
-              created to identify the extremal values of each violin's
-              data set.
+            - means: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the mean values of each of the violin's
+              distribution.
+            - mins: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the bottom of each violin's distribution.
+            - maxes: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the top of each violin's distribution.
+            - bars: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the centers of each violin's distribution.
+            - medians: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the median values of each of the violin's
+              distribution.
 
         """
 
-        bodies = []
+        # Statistical quantities to be plotted on the violins
         means = []
         mins = []
         maxes = []
         medians = []
+
+        # Collections to be returned
+        bodies = []
+        cmeans = None
+        cmaxes = None
+        cmins = None
+        cbars = None
+        cmedians = None
 
         # Validate positions
         if positions == None:
@@ -6763,24 +6778,28 @@ class Axes(_AxesBase):
 
         # Render means
         if showmeans:
-            mc = self.hlines(means, pmins, pmaxes, colors='r')
+            cmeans = self.hlines(means, pmins, pmaxes, colors='r')
 
         # Render extrema
         if showextrema:
-            mx = self.hlines(maxes, pmins, pmaxes, colors='r')
-            mn = self.hlines(mins, pmins, pmaxes, colors='r')
-            sticks = self.vlines(positions, mins, maxes, colors='r')
+            cmaxes = self.hlines(maxes, pmins, pmaxes, colors='r')
+            cmins = self.hlines(mins, pmins, pmaxes, colors='r')
+            cbars = self.vlines(positions, mins, maxes, colors='r')
 
         # Render medians
         if showmedians:
-            md = self.hlines(medians, pmins, pmaxes, colors='r')
+            cmedians = self.hlines(medians, pmins, pmaxes, colors='r')
 
         # Reset hold
         self.hold(holdStatus)
 
         return {
             'bodies' : bodies,
-            'means' : means
+            'means' : cmeans,
+            'mins' : cmins,
+            'maxes' : cmaxes,
+            'bars' : cbars,
+            'medians' : cmedians
         }
 
 
