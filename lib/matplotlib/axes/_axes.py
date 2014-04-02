@@ -6651,15 +6651,19 @@ class Axes(_AxesBase):
                                                  integer=True))
         return im
 
-    def violinplot(self, dataset, positions=None, vert=True, width=0.5):
+    def violinplot(self, dataset, positions=None, vert=True, widths=0.5,
+                   showmeans=False, showextrema=True, showmedians=False,
+                   points=100):
         """
         Make a violin plot.
 
         Call signature::
 
-          violinplot(dataset, positions=None)
+          violinplot(dataset, positions=None, vert=True, widths=0.5,
+                     showmeans=False, showextrema=True, showmedians=False,
+                     points=100):
 
-        Make a violin plot for each column of *dataset* or each vector in 
+        Make a violin plot for each column of *dataset* or each vector in
         sequence *dataset*.  Each filled area extends to represent the
         entire data range, with three lines at the mean, the minimum, and
         the maximum.
@@ -6674,15 +6678,27 @@ class Axes(_AxesBase):
             Sets the positions of the violins. The ticks and limits are
             automatically set to match the positions.
 
-          width : array-like, default = 0.5
+          vert : bool, default = True.
+            If true, creates a vertical violin plot.
+            Otherwise, creates a horizontal violin plot.
+
+          widths : array-like, default = 0.5
             Either a scalar or a vector that sets the maximal width of
             each violin. The default is 0.5, which uses about half of the
             available horizontal space.
 
-          vert : bool, default = False
-            If True (default), makes the boxes vertical.
-            If False, makes horizontal boxes.
+          showmeans : bool, default = False
+            If true, will toggle rendering of the means.
 
+          showextrema : bool, default = True
+            If true, will toggle rendering of the extrema.
+
+          showmedians : bool, default = False
+            If true, will toggle rendering of the medians.
+
+          points : scalar, default = 100
+            Defines the number of points to evaluate each of the gaussian
+            kernel density estimations at.
 
         Returns
         -------
@@ -6691,57 +6707,121 @@ class Axes(_AxesBase):
         corresponding collection instances created. The dictionary has
         the following keys:
 
-            - bodies: A list of the 
+            - bodies: A list of the
               :class:`matplotlib.collections.PolyCollection` instances
               containing the filled area of each violin.
-            - means: A list of the :class:`matplotlib.lines.Line2D` instances
-              created to identify the mean values for each of the violins.
-            - caps: A list of the :class:`matplotlib.lines.Line2D` instances
-              created to identify the extremal values of each violin's
-              data set.
+            - means: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the mean values of each of the violin's
+              distribution.
+            - mins: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the bottom of each violin's distribution.
+            - maxes: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the top of each violin's distribution.
+            - bars: A :class:`matplotlib.collections.LineCollection` instance
+              created to identify the centers of each violin's distribution.
+            - medians: A :class:`matplotlib.collections.LineCollection`
+              instance created to identify the median values of each of the
+              violin's distribution.
 
         """
 
-        bodies = []
+        # Statistical quantities to be plotted on the violins
         means = []
-        caps = []
+        mins = []
+        maxes = []
+        medians = []
 
+        # Collections to be returned
+        artists = {
+            'bodies': [],
+            'cmeans': None,
+            'cmaxes': None,
+            'cmins': None,
+            'cbars': None,
+            'cmedians': None
+        }
 
+        datashape_message = ("List of violinplot statistics and `{0}` "
+                             "values must have the same length")
 
-        if positions == None:
+        # Validate positions
+        if positions is None:
             positions = range(1, len(dataset) + 1)
         elif len(positions) != len(dataset):
             raise ValueError(datashape_message.format("positions"))
 
-        for d,p in zip(dataset,positions):            
+        # Validate widths
+        if np.isscalar(widths):
+            widths = [widths] * len(dataset)
+        elif len(widths) != len(dataset):
+            raise ValueError(datashape_message.format("widths"))
+
+        # Calculate mins and maxes for statistics lines
+        pmins = -0.25 * np.array(widths) + positions
+        pmaxes = 0.25 * np.array(widths) + positions
+
+        # Check hold status
+        if not self._hold:
+            self.cla()
+        hold_status = self._hold
+
+        # Check whether we are rendering vertically or horizontally
+        if vert:
+            fill = self.fill_betweenx
+            rlines = self.hlines
+            blines = self.vlines
+        else:
+            fill = self.fill_between
+            rlines = self.vlines
+            blines = self.hlines
+
+        # Render violins
+        for data, pos, width in zip(dataset, positions, widths):
             # Calculate the kernel density
-            m, M, v = mlab.ksdensity(d)
-            coords = np.arange(m,M,(M-m)/100.)
+            kde = mlab.GaussianKDE(data)
+            min_val = kde.dataset.min()
+            max_val = kde.dataset.max()
+            mean = np.mean(kde.dataset)
+            median = np.median(kde.dataset)
+            coords = np.arange(min_val, max_val, (max_val - min_val)/points)
+
+            vals = kde.evaluate(coords)
 
             # Since each data point p is plotted from v-p to v+p,
             # we need to scale it by an additional 0.5 factor so that we get
             # correct width in the end.
-            v = 0.5 * width * v/v.max()
+            vals = 0.5 * width * vals/vals.max()
 
-            if vert:
-                bodies += [self.fill_betweenx(coords,
-                                              -v+p,
-                                              v+p,
-                                              facecolor='y',
-                                              alpha=0.3)]                
-            else:
-                bodies += [self.fill_between(coords,
-                                              -v+p,
-                                              v+p,
-                                              facecolor='y',
-                                              alpha=0.3)]                
+            # create the violin bodies
+            artists['bodies'] += [fill(coords,
+                                       -vals + pos,
+                                       vals + pos,
+                                       facecolor='y',
+                                       alpha=0.3)]
 
+            means.append(mean)
+            mins.append(min_val)
+            maxes.append(max_val)
+            medians.append(median)
 
-        return {
-            'bodies' : bodies,
-            'means' : means,
-            'caps' : caps
-        }
+        # Render means
+        if showmeans:
+            artists['cmeans'] = rlines(means, pmins, pmaxes, colors='r')
+
+        # Render extrema
+        if showextrema:
+            artists['cmaxes'] = rlines(maxes, pmins, pmaxes, colors='r')
+            artists['cmins'] = rlines(mins, pmins, pmaxes, colors='r')
+            artists['cbars'] = blines(positions, mins, maxes, colors='r')
+
+        # Render medians
+        if showmedians:
+            artists['cmedians'] = rlines(medians, pmins, pmaxes, colors='r')
+
+        # Reset hold
+        self.hold(hold_status)
+
+        return artists
 
 
     def tricontour(self, *args, **kwargs):
