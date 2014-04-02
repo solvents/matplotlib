@@ -6652,13 +6652,16 @@ class Axes(_AxesBase):
         return im
 
     def violinplot(self, dataset, positions=None, vert=True, widths=0.5,
-                   showmeans=False, showextrema=True, showmedians=False):
+                   showmeans=False, showextrema=True, showmedians=False,
+                   points=100):
         """
         Make a violin plot.
 
         Call signature::
 
-          violinplot(dataset, positions=None)
+          violinplot(dataset, positions=None, vert=True, widths=0.5,
+                     showmeans=False, showextrema=True, showmedians=False,
+                     points=100):
 
         Make a violin plot for each column of *dataset* or each vector in
         sequence *dataset*.  Each filled area extends to represent the
@@ -6692,6 +6695,10 @@ class Axes(_AxesBase):
 
           showmedians : bool, default = False
             If true, will toggle rendering of the medians.
+
+          points : scalar, default = 100
+            Defines the number of points to evaluate each of the gaussian
+            kernel density estimations at.
 
         Returns
         -------
@@ -6777,7 +6784,7 @@ class Axes(_AxesBase):
             mean = kde['mean']
             median = kde['median']
             vals = kde['result']
-            coords = np.arange(min_val, max_val, (max_val - min_val)/100.)
+            coords = np.arange(min_val, max_val, (max_val - min_val)/points)
 
             # Since each data point p is plotted from v-p to v+p,
             # we need to scale it by an additional 0.5 factor so that we get
