@@ -6651,8 +6651,8 @@ class Axes(_AxesBase):
                                                  integer=True))
         return im
 
-    def violinplot(self, dataset, positions=None, vert=True, widths=0.5, showmeans=False,
-                   showextrema=True, showmedians=False):
+    def violinplot(self, dataset, positions=None, vert=True, widths=0.5,
+                   showmeans=False, showextrema=True, showmedians=False):
         """
         Make a violin plot.
 
@@ -6660,7 +6660,7 @@ class Axes(_AxesBase):
 
           violinplot(dataset, positions=None)
 
-        Make a violin plot for each column of *dataset* or each vector in 
+        Make a violin plot for each column of *dataset* or each vector in
         sequence *dataset*.  Each filled area extends to represent the
         entire data range, with three lines at the mean, the minimum, and
         the maximum.
@@ -6700,7 +6700,7 @@ class Axes(_AxesBase):
         corresponding collection instances created. The dictionary has
         the following keys:
 
-            - bodies: A list of the 
+            - bodies: A list of the
               :class:`matplotlib.collections.PolyCollection` instances
               containing the filled area of each violin.
             - means: A :class:`matplotlib.collections.LineCollection` instance
@@ -6712,9 +6712,9 @@ class Axes(_AxesBase):
               created to identify the top of each violin's distribution.
             - bars: A :class:`matplotlib.collections.LineCollection` instance
               created to identify the centers of each violin's distribution.
-            - medians: A :class:`matplotlib.collections.LineCollection` instance
-              created to identify the median values of each of the violin's
-              distribution.
+            - medians: A :class:`matplotlib.collections.LineCollection`
+              instance created to identify the median values of each of the
+              violin's distribution.
 
         """
 
@@ -6733,7 +6733,7 @@ class Axes(_AxesBase):
         cmedians = None
 
         # Validate positions
-        if positions == None:
+        if positions is None:
             positions = range(1, len(dataset) + 1)
         elif len(positions) != len(dataset):
             raise ValueError(datashape_message.format("positions"))
@@ -6754,7 +6754,7 @@ class Axes(_AxesBase):
         holdStatus = self._hold
 
         # Render violins
-        for d,p,w in zip(dataset,positions,widths):            
+        for d, p, w in zip(dataset, positions, widths):
             # Calculate the kernel density
             kde = mlab.ksdensity(d)
             m = kde['xmin']
@@ -6762,7 +6762,7 @@ class Axes(_AxesBase):
             mean = kde['mean']
             median = kde['median']
             v = kde['result']
-            coords = np.arange(m,M,(M-m)/100.)
+            coords = np.arange(m, M, (M-m)/100.)
 
             # Since each data point p is plotted from v-p to v+p,
             # we need to scale it by an additional 0.5 factor so that we get
@@ -6772,17 +6772,17 @@ class Axes(_AxesBase):
             # create vertical violin plot
             if vert:
                 bodies += [self.fill_betweenx(coords,
-                                          -v+p,
-                                          v+p,
-                                          facecolor='y',
-                                          alpha=0.3)]
-            # create horizontal violin plot
-            else:
-                bodies += [self.fill_between(coords,
                                               -v+p,
                                               v+p,
                                               facecolor='y',
                                               alpha=0.3)]
+            # create horizontal violin plot
+            else:
+                bodies += [self.fill_between(coords,
+                                             -v+p,
+                                             v+p,
+                                             facecolor='y',
+                                             alpha=0.3)]
 
             means.append(mean)
             mins.append(m)
@@ -6821,20 +6821,16 @@ class Axes(_AxesBase):
             if showmedians:
                 cmedians = self.vlines(medians, pmins, pmaxes, colors='r')
 
-
-
-
-
         # Reset hold
         self.hold(holdStatus)
 
         return {
-            'bodies' : bodies,
-            'means' : cmeans,
-            'mins' : cmins,
-            'maxes' : cmaxes,
-            'bars' : cbars,
-            'medians' : cmedians
+            'bodies': bodies,
+            'means': cmeans,
+            'mins': cmins,
+            'maxes': cmaxes,
+            'bars': cbars,
+            'medians': cmedians
         }
 
 
