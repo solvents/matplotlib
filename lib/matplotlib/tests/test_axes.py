@@ -1459,27 +1459,27 @@ data = [([ 0.07902449, -0.16769639,  1.1572525 ,  0.71400729, -0.17916727,
 @image_comparison(baseline_images=['test_vert_violinplot_baseline'])
 def test_vert_violinplot_baseline():
     ax = plt.axes()
-    ax.violinplot(data,positions=range(4))
+    ax.violinplot(data,range(4),showmeans=0,showextrema=0,showmedians=0)
 
-@image_comparison(baseline_images=['test_vert_violinplot_showmedian'])
-def test_vert_violinplot_showmedian():
-    pass
-
-@image_comparison(baseline_images=['test_vert_violinplot_showmean'])
-def test_vert_violinplot_showmean():
-    pass
-
+@image_comparison(baseline_images=['test_vert_violinplot_showmeans'])
+def test_vert_violinplot_showmeans():
+    ax = plt.axes()
+    ax.violinplot(data,range(4),showmeans=1,showextrema=0,showmedians=0)
 
 @image_comparison(baseline_images=['test_vert_violinplot_showextrema'])
 def test_vert_violinplot_showextrema():
-    pass
+    ax = plt.axes()
+    ax.violinplot(data,range(4),showmeans=0,showextrema=1,showmedians=0)
 
+@image_comparison(baseline_images=['test_vert_violinplot_showmedians'])
+def test_vert_violinplot_showmedians():
+    ax = plt.axes()
+    ax.violinplot(data,range(4),showmeans=0,showextrema=0,showmedians=1)
 
-@image_comparison(baseline_images=['test_vert_violinplot_show_mme'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
-def test_vert_violinplot_show_mme():
-    pass
+@image_comparison(baseline_images=['test_vert_violinplot_showall'])
+def test_vert_violinplot_showall():
+    ax = plt.axes()
+    ax.violinplot(data,range(4),showmeans=1,showextrema=1,showmedians=1)
 
 
 @image_comparison(baseline_images=['test_vert_violinplot_customwidths'],
