@@ -1399,112 +1399,113 @@ def test_boxplot_bad_ci_2():
                   conf_intervals=[[1, 2], [1]])
 
 # violin plot test starts here
-@image_comparison(baseline_images=['test_vert_violin_baseplot'],
+@image_comparison(baseline_images=['test_vert_violinplot_baseline'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_baseplot():
+def test_vert_violinplot_baseline():
     pass
 
-@image_comparison(baseline_images=['test_vert_violin_showmedian'],
+@image_comparison(baseline_images=['test_vert_violinplot_showmedian'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_showmedian():
+def test_vert_violinplot_showmedian():
     pass
 
-@image_comparison(baseline_images=['test_vert_violin_showmean'],
+@image_comparison(baseline_images=['test_vert_violinplot_showmean'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_showmean():
-    pass
-
-
-@image_comparison(baseline_images=['test_vert_violin_showextrema'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
-def test_vert_violin_showextrema():
+def test_vert_violinplot_showmean():
     pass
 
 
-@image_comparison(baseline_images=['test_vert_violin_show_mme'],
+@image_comparison(baseline_images=['test_vert_violinplot_showextrema'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_show_mme():
+def test_vert_violinplot_showextrema():
     pass
 
 
-@image_comparison(baseline_images=['test_vert_violin_customwidths'],
+@image_comparison(baseline_images=['test_vert_violinplot_show_mme'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_customwidths():
+def test_vert_violinplot_show_mme():
     pass
 
 
-@image_comparison(baseline_images=['test_vert_violin_custompoints_10'],
+@image_comparison(baseline_images=['test_vert_violinplot_customwidths'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_custompoints_10():
+def test_vert_violinplot_customwidths():
     pass
 
 
-@image_comparison(baseline_images=['test_vert_violin_baseplot_200'],
+@image_comparison(baseline_images=['test_vert_violinplot_custompoints_10'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_vert_violin_baseplot_200():
-    pass
-
-@image_comparison(baseline_images=['test_horiz_violin_baseplot'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
-def test_horiz_violin_baseplot():
-    pass
-
-@image_comparison(baseline_images=['test_horiz_violin_showmedian'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
-def test_horiz_violin_showmedian():
-    pass
-
-@image_comparison(baseline_images=['test_horiz_violin_showmean'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
-def test_horiz_violin_showmean():
+def test_vert_violinplot_custompoints_10():
     pass
 
 
-@image_comparison(baseline_images=['test_horiz_violin_showextrema'],
+@image_comparison(baseline_images=['test_vert_violinplot_custompoints_200'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_horiz_violin_showextrema():
+def test_vert_violinplot_custompoints_200():
+    pass
+
+@image_comparison(baseline_images=['test_horiz_violinplot_baseline'],
+                  extensions=['png'],
+                  savefig_kwarg={'dpi': 40})
+def test_horiz_violinplot_baseline():
+    pass
+
+@image_comparison(baseline_images=['test_horiz_violinplot_showmedian'],
+                  extensions=['png'],
+                  savefig_kwarg={'dpi': 40})
+def test_horiz_violinplot_showmedian():
+    pass
+
+@image_comparison(baseline_images=['test_horiz_violinplot_showmean'],
+                  extensions=['png'],
+                  savefig_kwarg={'dpi': 40})
+def test_horiz_violinplot_showmean():
     pass
 
 
-@image_comparison(baseline_images=['test_horiz_violin_show_mme'],
+@image_comparison(baseline_images=['test_horiz_violinplot_showextrema'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_horiz_violin_show_mme():
+def test_horiz_violinplot_showextrema():
     pass
 
 
-@image_comparison(baseline_images=['test_horiz_violin_customwidths'],
+@image_comparison(baseline_images=['test_horiz_violinplot_show_mme'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_horiz_violin_customwidths():
+def test_horiz_violinplot_show_mme():
     pass
 
 
-@image_comparison(baseline_images=['test_horiz_violin_custompoints_10'],
+@image_comparison(baseline_images=['test_horiz_violinplot_customwidths'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_horiz_violin_custompoints_10():
+def test_horiz_violinplot_customwidths():
     pass
 
 
-@image_comparison(baseline_images=['test_horiz_violin_baseplot_200'],
+@image_comparison(baseline_images=['test_horiz_violinplot_custompoints_10'],
                   extensions=['png'],
                   savefig_kwarg={'dpi': 40})
-def test_horiz_violin_baseplot_200():
+def test_horiz_violinplot_custompoints_10():
     pass
 
+
+@image_comparison(baseline_images=['test_horiz_violinplot_custompoints_200'],
+                  extensions=['png'],
+                  savefig_kwarg={'dpi': 40})
+def test_horiz_violinplot_custompoints_200():
+    pass
+
+# test error
 def test_violinplot_bad_position():
     pass
 
