@@ -1456,28 +1456,21 @@ data = [([ 0.07902449, -0.16769639,  1.1572525 ,  0.71400729, -0.17916727,
         1.01390851,  0.29328188, -0.2223719 , -1.29928072,  0.59399753])]
 
 # violin plot test starts here
-@image_comparison(baseline_images=['test_vert_violinplot_baseline'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
+@image_comparison(baseline_images=['test_vert_violinplot_baseline'])
 def test_vert_violinplot_baseline():
-    pass
+    ax = plt.axes()
+    ax.violinplot(data,positions=range(4))
 
-@image_comparison(baseline_images=['test_vert_violinplot_showmedian'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
+@image_comparison(baseline_images=['test_vert_violinplot_showmedian'])
 def test_vert_violinplot_showmedian():
     pass
 
-@image_comparison(baseline_images=['test_vert_violinplot_showmean'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
+@image_comparison(baseline_images=['test_vert_violinplot_showmean'])
 def test_vert_violinplot_showmean():
     pass
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_showextrema'],
-                  extensions=['png'],
-                  savefig_kwarg={'dpi': 40})
+@image_comparison(baseline_images=['test_vert_violinplot_showextrema'])
 def test_vert_violinplot_showextrema():
     pass
 
