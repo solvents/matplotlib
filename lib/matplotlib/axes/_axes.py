@@ -6741,10 +6741,7 @@ class Axes(_AxesBase):
         # Validate positions
         if positions == None:
             positions = range(1, len(dataset) + 1)
-        
-        dataset = [dataset for i in positions]
-
-        if len(positions) != len(dataset):
+        elif len(positions) != len(dataset):
             raise ValueError(datashape_message.format("positions"))
 
         # Validate widths
