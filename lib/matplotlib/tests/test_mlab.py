@@ -2763,8 +2763,10 @@ def test_griddata_nn():
                                   np.ma.getmask(correct_zi_masked))
 
 #*****************************************************************
+# These Tests where taken from SCIPY with some minor modifications
+# this can be retreived from: 
+# https://github.com/scipy/scipy/blob/master/scipy/stats/tests/test_kdeoth.py
 #*****************************************************************
-
 
 class ksdensity_test():
 
