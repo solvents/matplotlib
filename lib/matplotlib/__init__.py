@@ -126,6 +126,11 @@ def compare_versions(a, b):
     else:
         return False
 
+if not compare_versions(six.__version__, '1.5'):
+    raise ImportError(
+        'six 1.5 or later is required; you have %s' % (
+            six.__version__))
+
 try:
     import pyparsing
 except ImportError:
@@ -754,7 +759,7 @@ def matplotlib_fname():
                     "Found matplotlib configuration in ~/.matplotlib/. "
                     "To conform with the XDG base directory standard, "
                     "this configuration location has been deprecated "
-                    "on Linux, and the new location is now %r/matplotlib/. "
+                    "on Linux, and the new location is now %s/matplotlib/. "
                     "Please move your configuration there to ensure that "
                     "matplotlib will continue to find it in the future." %
                     _get_xdg_config_dir())
@@ -1305,6 +1310,7 @@ default_test_modules = [
     'matplotlib.tests.test_arrow_patches',
     'matplotlib.tests.test_artist',
     'matplotlib.tests.test_axes',
+    'matplotlib.tests.test_axes_grid1',
     'matplotlib.tests.test_backend_pdf',
     'matplotlib.tests.test_backend_pgf',
     'matplotlib.tests.test_backend_ps',

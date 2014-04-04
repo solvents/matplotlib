@@ -71,6 +71,19 @@ def test_set_line_coll_dash():
     assert True
 
 
+@cleanup
+def test_line_colors():
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(range(10), color='none')
+    ax.plot(range(10), color='r')
+    ax.plot(range(10), color='.3')
+    ax.plot(range(10), color=(1, 0, 0, 1))
+    ax.plot(range(10), color=(1, 0, 0))
+    fig.canvas.draw()
+    assert True
+
+
 @image_comparison(baseline_images=['line_collection_dashes'], remove_text=True)
 def test_set_line_coll_dash_image():
     fig = plt.figure()
@@ -86,3 +99,7 @@ def test_nan_is_sorted():
     assert_true(line._is_sorted(np.array([1,2,3])))
     assert_true(not line._is_sorted(np.array([1,np.nan,3])))
 
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

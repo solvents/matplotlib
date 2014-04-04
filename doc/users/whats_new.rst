@@ -32,6 +32,14 @@ Phil Elson rewrote of the documentation and userguide for both Legend and PathEf
 New plotting features
 ---------------------
 
+Power-law normalization
+```````````````````````
+Ben Gamari added a power-law normalization method,
+:class:`~matplotlib.colors.PowerNorm`. This class maps a range of 
+values to the interval [0,1] with power-law scaling with the exponent
+provided by the constructor's `gamma` argument. Power law normalization
+can be useful for, e.g., emphasizing small populations in a histogram.
+
 Fully customizable boxplots
 ````````````````````````````
 Paul Hobson overhauled the :func:`~matplotlib.pyplot.boxplot` method such
@@ -114,6 +122,37 @@ Added the `kwarg` 'which' to :func:`~matplotlib.Axes.get_xticklabels`,
 :func:`~matplotlib.Axis.set_ticks_position`.  If 'which' is `None` then the old
 behaviour (controlled by the bool `minor`).
 
+Separate horizontal/vertical axes padding support in ImageGrid
+``````````````````````````````````````````````````````````````
+The `kwarg` 'axes_pad' to :class:`mpl_toolkits.axes_grid1.ImageGrid` can now
+be a tuple if separate horizontal/vertical padding is needed.
+This is supposed to be very helpful when you have a labelled legend next to
+every subplot and you need to make some space for legend's labels.
+
+Support for skewed transformations
+``````````````````````````````````
+The :class:`~matplotlib.transforms.Affine2D` gained additional methods
+`skew` and `skew_deg` to create skewed transformations. Additionally,
+matplotlib internals were cleaned up to support using such transforms in
+:class:`~matplotlib.Axes`. This transform is important for some plot types,
+specifically the Skew-T used in meteorology.
+
+.. plot:: mpl_examples/api/skewt.py
+
+Support for specifying properties of wedge and text in pie charts.
+``````````````````````````````````````````````````````````````
+Added the `kwargs` 'wedgeprops' and 'textprops' to :func:`~matplotlib.Axes.pie`
+to accept properties for wedge and text objects in a pie. For example, one can
+specify wedgeprops = {'linewidth':3} to specify the width of the borders of
+the wedges in the pie. For more properties that the user can specify, look at
+the docs for the wedge and text objects.
+
+Fixed the direction of errorbar upper/lower limits
+``````````````````````````````````````````````````
+Larry Bradley fixed the :func:`~matplotlib.pyplot.errorbar` method such
+that the upper and lower limits (*lolims*, *uplims*, *xlolims*,
+*xuplims*) now point in the correct direction.
+
 Date handling
 -------------
 
@@ -173,6 +212,9 @@ vertically arranged now, buttons for tight layout and reset were
 added. Furthermore, the the subplottool is now implemented as a modal
 dialog. It was previously a QMainWindow, leaving the SPT open if one closed the
 plotwindow.
+
+Interactive performance of the Qt4 backend has been dramatically improved
+under windows.
 
 Cairo backends
 ``````````````
