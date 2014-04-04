@@ -15,8 +15,8 @@ from matplotlib.testing.decorators import image_comparison, cleanup
 import matplotlib.pyplot as plt
 
 
-simple_dataset = [[0.9,1.1,0.9,1.1,1], [2.2,2,1.8,1.8,2,2.2]]
-other_dataset = [[3.3,2.2,1.1], [4.4, 8.8, 2.2]]
+simple_dataset = [[0.9, 1.1, 0.9, 1.1, 1], [2.2, 2, 1.8, 1.8, 2, 2.2]]
+other_dataset = [[3.3, 2.2, 1.1], [4.4, 8.8, 2.2]]
 
 
 #test for positions is none
