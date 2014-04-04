@@ -20,7 +20,7 @@ other_dataset = [[3.3, 2.2, 1.1], [4.4, 8.8, 2.2]]
 
 
 #test for positions is none
-@cleanup
+@image_comparison(baseline_images=['violinplot_simple_dist'])
 def test_violinplot_positions_none():
     plt.violinplot(simple_dataset, positions=None)
 
@@ -38,12 +38,13 @@ def test_violinplot_positions_valid():
 
 
 #test for widths is valid
+@image_comparison(baseline_images=['violinplot_simple_widths'])
 def test_violinplot_widths_valid():
     plt.violinplot(simple_dataset, widths=[0.5, 1])
 
 
 #test for widths is a scalar
-@cleanup
+@image_comparison(baseline_images=['violinplot_scalar_width'])
 def test_violinplot_widths_scalar():
     plt.violinplot(simple_dataset, widths=1.5)
 
