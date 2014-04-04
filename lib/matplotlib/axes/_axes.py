@@ -6830,7 +6830,6 @@ class Axes(_AxesBase):
 
         return artists
 
-
     def tricontour(self, *args, **kwargs):
         return mtri.tricontour(self, *args, **kwargs)
     tricontour.__doc__ = mtri.TriContourSet.tricontour_doc
