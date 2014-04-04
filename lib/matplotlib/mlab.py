@@ -3677,7 +3677,7 @@ class GaussianKDE(object):
     Representation of a kernel-density estimate using Gaussian kernels.
 
     Call signature::
-    kde = gaussian_kde(dataset, 'silverman')
+    kde = GaussianKDE(dataset, bw_method='silverman')
 
     Parameters
     ----------
@@ -3731,8 +3731,7 @@ class GaussianKDE(object):
             self.covariance_factor = self.scotts_factor
         elif bw_method == 'silverman':
             self.covariance_factor = self.silverman_factor
-        elif np.isscalar(bw_method):
-            if not isinstance(bw_method, six.string_types):
+        elif np.isscalar(bw_method) and not isinstance(bw_method, six.string_types):
                 self._bw_method = 'use constant'
                 self.covariance_factor = lambda: bw_method
         elif callable(bw_method):
@@ -3796,14 +3795,9 @@ class GaussianKDE(object):
 
         dim, num_m = np.array(points).shape
         if dim != self.dim:
-            if dim == 1 and num_m == self.dim:
-                # points was passed in as a row vector
-                points = np.reshape(points, (self.dim, 1))
-                num_m = 1
-            else:
-                msg = "points have dimension %s, dataset has dimension %s" % (
-                    dim, self.dim)
-                raise ValueError(msg)
+            msg = "points have dimension %s, dataset has dimension %s" % (
+                dim, self.dim)
+            raise ValueError(msg)
 
         result = np.zeros((num_m,), dtype=np.float)
 
