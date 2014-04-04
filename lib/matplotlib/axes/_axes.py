@@ -6653,7 +6653,7 @@ class Axes(_AxesBase):
 
     def violinplot(self, dataset, positions=None, vert=True, widths=0.5,
                    showmeans=False, showextrema=True, showmedians=False,
-                   points=100):
+                   points=100, bw_method=None):
         """
         Make a violin plot.
 
@@ -6778,7 +6778,7 @@ class Axes(_AxesBase):
         # Render violins
         for data, pos, width in zip(dataset, positions, widths):
             # Calculate the kernel density
-            kde = mlab.GaussianKDE(data)
+            kde = mlab.GaussianKDE(data, bw_method)
             min_val = kde.dataset.min()
             max_val = kde.dataset.max()
             mean = np.mean(kde.dataset)
