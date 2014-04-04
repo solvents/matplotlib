@@ -6700,6 +6700,13 @@ class Axes(_AxesBase):
             Defines the number of points to evaluate each of the gaussian
             kernel density estimations at.
 
+          bw_method : str, scalar or callable, optional
+            The method used to calculate the estimator bandwidth.  This can be
+            'scott', 'silverman', a scalar constant or a callable.  If a
+            scalar, this will be used directly as `kde.factor`.  If a 
+            callable, it should take a `GaussianKDE` instance as only 
+            parameter and return a scalar. If None (default), 'scott' is used.
+
         Returns
         -------
 
