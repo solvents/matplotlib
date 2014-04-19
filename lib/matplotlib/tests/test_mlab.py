@@ -2772,7 +2772,7 @@ class gaussian_kde_tests():
         kde = mlab.GaussianKDE(x1)
         y_expected = [0.13480721, 0.18222869, 0.19514935, 0.18222869,
                       0.13480721]
-        assert_array_almost_equal(kde(x1), y_expected, decimal=6)
+        np.testing.assert_array_almost_equal(kde(x1), y_expected, decimal=6)
 
     def test_gaussian_kde_covariance_caching(self):
         x1 = np.array([-7, -5, 1, 4, 5], dtype=np.float)
@@ -2786,7 +2786,7 @@ class gaussian_kde_tests():
         kde2 = mlab.GaussianKDE(x1, 'scott')
         y2 = kde2(xs)
 
-        assert_array_almost_equal(y_expected, y2, decimal=7)
+        np.testing.assert_array_almost_equal(y_expected, y2, decimal=7)
 
     def test_kde_bandwidth_method(self):
 
@@ -2902,7 +2902,7 @@ class gaussian_kde_evaluate_tests(object):
             0.08797252, 0.11774109, 0.11774109, 0.08797252, 0.0370153
         ]
         y = kde.evaluate(x2)
-        assert_array_almost_equal(y, y_expected, 7)
+        np.testing.assert_array_almost_equal(y, y_expected, 7)
 
     def test_evaluate_inv_dim(self):
         """ Invert the dimensions. ie, Give the dataset a dimension of
@@ -2922,7 +2922,7 @@ class gaussian_kde_evaluate_tests(object):
         kde = mlab.GaussianKDE(x1)
         y_expected = [0.08797252]
         y = kde.evaluate(x2)
-        assert_array_almost_equal(y, y_expected, 7)
+        np.testing.assert_array_almost_equal(y, y_expected, 7)
 
     def test_evaluate_point_dim_not_one(self):
         """Test"""
@@ -2938,7 +2938,7 @@ class gaussian_kde_evaluate_tests(object):
         kde = mlab.GaussianKDE(x1)
         y_expected = [0.08797252, 0.11774109, 0.11774109]
         y = kde.evaluate(x2)
-        assert_array_almost_equal(y, y_expected, 7)
+        np.testing.assert_array_almost_equal(y, y_expected, 7)
 
 
 #*****************************************************************
