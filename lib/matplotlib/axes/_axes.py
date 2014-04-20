@@ -6661,7 +6661,7 @@ class Axes(_AxesBase):
 
           violinplot(dataset, positions=None, vert=True, widths=0.5,
                      showmeans=False, showextrema=True, showmedians=False,
-                     points=100):
+                     points=100, bw_method=None):
 
         Make a violin plot for each column of *dataset* or each vector in
         sequence *dataset*.  Each filled area extends to represent the
@@ -6790,7 +6790,7 @@ class Axes(_AxesBase):
             max_val = kde.dataset.max()
             mean = np.mean(kde.dataset)
             median = np.median(kde.dataset)
-            coords = np.arange(min_val, max_val, (max_val - min_val)/points)
+            coords = np.linspace(min_val, max_val, points)
 
             vals = kde.evaluate(coords)
 
