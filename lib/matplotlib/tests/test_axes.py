@@ -1619,11 +1619,13 @@ def test_horiz_violinplot_custompoints_200():
 
 
 # test error
+@cleanup
 def test_violinplot_bad_positions():
     ax = plt.axes()
     assert_raises(ValueError, ax.violinplot, data, positions=range(5))
 
 
+@cleanup
 def test_violinplot_bad_widths():
     ax = plt.axes()
     assert_raises(ValueError, ax.violinplot, data, positions=range(4),
