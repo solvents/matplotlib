@@ -1460,7 +1460,7 @@ def test_boxplot_bad_ci_2():
                   conf_intervals=[[1, 2], [1]])
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_baseline'])
+@image_comparison(baseline_images=['violinplot_vert_baseline'])
 def test_vert_violinplot_baseline():
     # First 9 digits of frac(sqrt(2))
     np.random.seed(414213562)
@@ -1470,7 +1470,7 @@ def test_vert_violinplot_baseline():
                   showmedians=0)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_showmeans'])
+@image_comparison(baseline_images=['violinplot_vert_showmeans'])
 def test_vert_violinplot_showmeans():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(3))
@@ -1480,7 +1480,7 @@ def test_vert_violinplot_showmeans():
                   showmedians=0)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_showextrema'])
+@image_comparison(baseline_images=['violinplot_vert_showextrema'])
 def test_vert_violinplot_showextrema():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(5))
@@ -1490,7 +1490,7 @@ def test_vert_violinplot_showextrema():
                   showmedians=0)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_showmedians'])
+@image_comparison(baseline_images=['violinplot_vert_showmedians'])
 def test_vert_violinplot_showmedians():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(7))
@@ -1500,7 +1500,7 @@ def test_vert_violinplot_showmedians():
                   showmedians=1)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_showall'])
+@image_comparison(baseline_images=['violinplot_vert_showall'])
 def test_vert_violinplot_showall():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(11))
@@ -1510,7 +1510,7 @@ def test_vert_violinplot_showall():
                   showmedians=1)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_custompoints_10'])
+@image_comparison(baseline_images=['violinplot_vert_custompoints_10'])
 def test_vert_violinplot_custompoints_10():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(13))
@@ -1520,7 +1520,7 @@ def test_vert_violinplot_custompoints_10():
                   showmedians=0, points=10)
 
 
-@image_comparison(baseline_images=['test_vert_violinplot_custompoints_200'])
+@image_comparison(baseline_images=['violinplot_vert_custompoints_200'])
 def test_vert_violinplot_custompoints_200():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(17))
@@ -1530,7 +1530,7 @@ def test_vert_violinplot_custompoints_200():
                   showmedians=0, points=200)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_baseline'])
+@image_comparison(baseline_images=['violinplot_horiz_baseline'])
 def test_horiz_violinplot_baseline():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(19))
@@ -1540,7 +1540,7 @@ def test_horiz_violinplot_baseline():
                   showextrema=0, showmedians=0)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_showmedians'])
+@image_comparison(baseline_images=['violinplot_horiz_showmedians'])
 def test_horiz_violinplot_showmedians():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(23))
@@ -1550,7 +1550,7 @@ def test_horiz_violinplot_showmedians():
                   showextrema=0, showmedians=1)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_showmeans'])
+@image_comparison(baseline_images=['violinplot_horiz_showmeans'])
 def test_horiz_violinplot_showmeans():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(29))
@@ -1560,7 +1560,7 @@ def test_horiz_violinplot_showmeans():
                   showextrema=0, showmedians=0)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_showextrema'])
+@image_comparison(baseline_images=['violinplot_horiz_showextrema'])
 def test_horiz_violinplot_showextrema():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(31))
@@ -1570,7 +1570,7 @@ def test_horiz_violinplot_showextrema():
                   showextrema=1, showmedians=0)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_showall'])
+@image_comparison(baseline_images=['violinplot_horiz_showall'])
 def test_horiz_violinplot_showall():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(37))
@@ -1580,7 +1580,7 @@ def test_horiz_violinplot_showall():
                   showextrema=1, showmedians=1)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_custompoints_10'])
+@image_comparison(baseline_images=['violinplot_horiz_custompoints_10'])
 def test_horiz_violinplot_custompoints_10():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(41))
@@ -1590,7 +1590,7 @@ def test_horiz_violinplot_custompoints_10():
                   showextrema=0, showmedians=0, points=10)
 
 
-@image_comparison(baseline_images=['test_horiz_violinplot_custompoints_200'])
+@image_comparison(baseline_images=['violinplot_horiz_custompoints_200'])
 def test_horiz_violinplot_custompoints_200():
     ax = plt.axes()
     # First 9 digits of frac(sqrt(43))
