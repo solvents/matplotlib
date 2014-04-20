@@ -2867,7 +2867,7 @@ class gaussian_kde_custom_tests(object):
         np.random.seed(8765678)
         n_basesample = 50
         multidim_data = [np.random.randn(n_basesample) for i in range(5)]
-        callable_fun = lambda (x): 0.55
+        callable_fun = lambda x: 0.55
         kde = mlab.GaussianKDE(multidim_data, bw_method=callable_fun)
         assert_equal(kde.covariance_factor(), 0.55)
 
