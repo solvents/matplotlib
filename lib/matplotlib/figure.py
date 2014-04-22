@@ -641,7 +641,7 @@ class Figure(Artist):
         """
         set_size_inches(w,h, forward=False)
 
-        Set the figure size in inches
+        Set the figure size in inches (1in == 2.54cm)
 
         Usage::
 
@@ -653,6 +653,11 @@ class Figure(Artist):
         from the shell
 
         ACCEPTS: a w,h tuple with w,h in inches
+
+        See Also
+        --------
+
+        matplotlib.Figure.get_size_inches
         """
 
         forward = kwargs.get('forward', False)
@@ -673,7 +678,21 @@ class Figure(Artist):
                 manager.resize(int(canvasw), int(canvash))
 
     def get_size_inches(self):
-        return self.bbox_inches.p1
+        """
+        Returns the current size of the figure in inches (1in == 2.54cm)
+        as an numpy array.
+
+        Returns
+        -------
+        size : ndarray
+           The size of the figure in inches
+
+        See Also
+        --------
+
+        matplotlib.Figure.set_size_inches
+        """
+        return np.array(self.bbox_inches.p1)
 
     def get_edgecolor(self):
         'Get the edge color of the Figure rectangle'
@@ -892,6 +911,9 @@ class Figure(Artist):
         *kwargs*) then it will simply make that subplot current and
         return it.
 
+        .. seealso:: :meth:`~matplotlib.pyplot.subplot` for an
+           explanation of the args.
+
         The following kwargs are supported:
 
         %(Axes)s
@@ -901,6 +923,10 @@ class Figure(Artist):
 
         if len(args) == 1 and isinstance(args[0], int):
             args = tuple([int(c) for c in str(args[0])])
+            if len(args) != 3:
+                raise ValueError("Integer subplot specification must " +
+                                 "be a three digit number.  " +
+                                 "Not {n:d}".format(n=len(args)))
 
         if isinstance(args[0], SubplotBase):
 
@@ -1162,6 +1188,7 @@ class Figure(Artist):
         """
         l = Legend(self, handles, labels, *args, **kwargs)
         self.legends.append(l)
+        l._remove_method = lambda h: self.legends.remove(h)
         return l
 
     @docstring.dedent_interpd

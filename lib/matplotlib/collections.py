@@ -192,13 +192,13 @@ class Collection(artist.Artist, cm.ScalarMappable):
             # get_path_collection_extents handles nan but not masked arrays
         offsets.shape = (-1, 2)                     # Make it Nx2
 
-        if paths:
+        if len(paths) and len(offsets):
             result = mpath.get_path_collection_extents(
                 transform.frozen(), paths, self.get_transforms(),
                 offsets, transOffset.frozen())
             result = result.inverse_transformed(transData)
         else:
-            result = transforms.Bbox([[0, 0], [0, 0]])
+            result = transforms.Bbox.null()
         return result
 
     def get_window_extent(self, renderer):
@@ -1438,8 +1438,8 @@ class EllipseCollection(Collection):
         self._transforms = np.zeros((len(self._widths), 3, 3))
         widths = self._widths * sc
         heights = self._heights * sc
-        sin_angle = np.cos(np.deg2rad(self._angles))
-        cos_angle = np.cos(np.deg2rad(self._angles))
+        sin_angle = np.sin(self._angles)
+        cos_angle = np.cos(self._angles)
         self._transforms[:, 0, 0] = widths * cos_angle
         self._transforms[:, 0, 1] = heights * -sin_angle
         self._transforms[:, 1, 0] = widths * sin_angle
@@ -1715,9 +1715,6 @@ class QuadMesh(Collection):
         colors = colors.reshape((meshWidth * meshHeight * 4, 3, 4))
 
         return triangles, colors
-
-    def get_datalim(self, transData):
-        return self._bbox
 
     @allow_rasterization
     def draw(self, renderer):

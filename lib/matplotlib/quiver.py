@@ -283,6 +283,8 @@ class QuiverKey(martist.Artist):
 
     def _init(self):
         if True:  # not self._initialized:
+            if not self.Q._initialized:
+                self.Q._init()
             self._set_transform()
             _pivot = self.Q.pivot
             self.Q.pivot = self.pivot[self.labelpos]
@@ -303,6 +305,7 @@ class QuiverKey(martist.Artist):
             if self.color is not None:
                 self.vector.set_color(self.color)
             self.vector.set_transform(self.Q.get_transform())
+            self.vector.set_figure(self.get_figure())
             self._initialized = True
 
     def _text_x(self, x):
@@ -483,6 +486,21 @@ class Quiver(mcollections.PolyCollection):
             if self.width is None:
                 sn = max(8, min(25, math.sqrt(self.N)))
                 self.width = 0.06 * self.span / sn
+
+            # _make_verts sets self.scale if not already specified
+            if not self._initialized and self.scale is None:
+                self._make_verts(self.U, self.V)
+
+            self._initialized = True
+
+    def get_datalim(self, transData):
+        trans = self.get_transform()
+        transOffset = self.get_offset_transform()
+        full_transform = (trans - transData) + (transOffset - transData)
+        XY = full_transform.transform(self.XY)
+        bbox = transforms.Bbox.null()
+        bbox.update_from_data_xy(XY, ignore=True)
+        return bbox
 
     @allow_rasterization
     def draw(self, renderer):

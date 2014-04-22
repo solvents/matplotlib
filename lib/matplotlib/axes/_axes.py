@@ -210,25 +210,25 @@ class Axes(_AxesBase):
         return self.yaxis.set_label_text(ylabel, fontdict, **kwargs)
 
     def _get_legend_handles(self, legend_handler_map=None):
-        "return artists that will be used as handles for legend"
+        """
+        Return a generator of artists that can be used as handles in
+        a legend.
+
+        """
         handles_original = (self.lines + self.patches +
                             self.collections + self.containers)
-
-        # collections
         handler_map = mlegend.Legend.get_default_handler_map()
 
         if legend_handler_map is not None:
             handler_map = handler_map.copy()
             handler_map.update(legend_handler_map)
 
-        handles = []
-        for h in handles_original:
-            if h.get_label() == "_nolegend_":  # .startswith('_'):
-                continue
-            if mlegend.Legend.get_legend_handler(handler_map, h):
-                handles.append(h)
+        has_handler = mlegend.Legend.get_legend_handler
 
-        return handles
+        for handle in handles_original:
+            label = handle.get_label()
+            if label != '_nolegend_' and has_handler(handler_map, handle):
+                yield handle
 
     def get_legend_handles_labels(self, legend_handler_map=None):
         """
@@ -240,7 +240,6 @@ class Axes(_AxesBase):
           ax.legend(h, l)
 
         """
-
         handles = []
         labels = []
         for handle in self._get_legend_handles(legend_handler_map):
@@ -253,207 +252,264 @@ class Axes(_AxesBase):
 
     def legend(self, *args, **kwargs):
         """
-        Place a legend on the current axes.
+        Places a legend on the axes.
 
-        Call signature::
+        To make a legend for lines which already exist on the axes
+        (via plot for instance), simply call this function with an iterable
+        of strings, one for each legend item. For example::
 
-           legend(*args, **kwargs)
+            ax.plot([1, 2, 3])
+            ax.legend(['A simple line'])
 
-        Places legend at location *loc*.  Labels are a sequence of
-        strings and *loc* can be a string or an integer specifying the
-        legend location.
+        However, in order to keep the "label" and the legend element
+        instance together, it is preferable to specify the label either at
+        artist creation, or by calling the
+        :meth:`~matplotlib.artist.Artist.set_label` method on the artist::
 
-        To make a legend with existing lines::
+            line, = ax.plot([1, 2, 3], label='Inline label')
+            # Overwrite the label by calling the method.
+            line.set_label('Label via method')
+            ax.legend()
 
-           legend()
+        Specific lines can be excluded from the automatic legend element
+        selection by defining a label starting with an underscore.
+        This is default for all artists, so calling :meth:`legend` without
+        any arguments and without setting the labels manually will result in
+        no legend being drawn.
 
-        :meth:`legend` by itself will try and build a legend using the label
-        property of the lines/patches/collections.  You can set the label of
-        a line by doing::
+        For full control of which artists have a legend entry, it is possible
+        to pass an iterable of legend artists followed by an iterable of
+        legend labels respectively::
 
-           plot(x, y, label='my data')
+           legend((line1, line2, line3), ('label1', 'label2', 'label3'))
 
-        or::
+        Parameters
+        ----------
+        loc : int or string or pair of floats, default: 0
+            The location of the legend. Possible codes are:
 
-           line.set_label('my data').
-
-        If label is set to '_nolegend_', the item will not be shown in
-        legend.
-
-        To automatically generate the legend from labels::
-
-           legend( ('label1', 'label2', 'label3') )
-
-        To make a legend for a list of lines and labels::
-
-           legend( (line1, line2, line3), ('label1', 'label2', 'label3') )
-
-        To make a legend at a given location, using a location argument::
-
-           legend( ('label1', 'label2', 'label3'), loc='upper left')
-
-        or::
-
-           legend((line1, line2, line3), ('label1', 'label2', 'label3'), loc=2)
-
-        The location codes are
-
-          ===============   =============
-          Location String   Location Code
-          ===============   =============
-          'best'            0
-          'upper right'     1
-          'upper left'      2
-          'lower left'      3
-          'lower right'     4
-          'right'           5
-          'center left'     6
-          'center right'    7
-          'lower center'    8
-          'upper center'    9
-          'center'          10
-          ===============   =============
+                ===============   =============
+                Location String   Location Code
+                ===============   =============
+                'best'            0
+                'upper right'     1
+                'upper left'      2
+                'lower left'      3
+                'lower right'     4
+                'right'           5
+                'center left'     6
+                'center right'    7
+                'lower center'    8
+                'upper center'    9
+                'center'          10
+                ===============   =============
 
 
-        Users can specify any arbitrary location for the legend using the
-        *bbox_to_anchor* keyword argument. bbox_to_anchor can be an instance
-        of BboxBase(or its derivatives) or a tuple of 2 or 4 floats.
-        For example::
+            Alternatively can be a 2-tuple giving ``x, y`` of the lower-left
+            corner of the legend in axes coordinates (in which case
+            ``bbox_to_anchor`` will be ignored).
 
-           loc = 'upper right', bbox_to_anchor = (0.5, 0.5)
+        bbox_to_anchor : :class:`matplotlib.transforms.BboxBase` instance \
+                         or tuple of floats
+            Specify any arbitrary location for the legend in `bbox_transform`
+            coordinates (default Axes coordinates).
 
-        will place the legend so that the upper right corner of the legend at
-        the center of the axes.
+            For example, to put the legend's upper right hand corner in the
+            center of the axes the following keywords can be used::
 
-        The legend location can be specified in other coordinate, by using the
-        *bbox_transform* keyword.
+               loc='upper right', bbox_to_anchor=(0.5, 0.5)
 
-        The loc itslef can be a 2-tuple giving x,y of the lower-left corner of
-        the legend in axes coords (*bbox_to_anchor* is ignored).
+        ncol : integer
+            The number of columns that the legend has. Default is 1.
 
-        Keyword arguments:
+        prop : None or :class:`matplotlib.font_manager.FontProperties` or dict
+            The font properties of the legend. If None (default), the current
+            :data:`matplotlib.rcParams` will be used.
 
-          *prop*: [ *None* | FontProperties | dict ]
-            A :class:`matplotlib.font_manager.FontProperties`
-            instance. If *prop* is a dictionary, a new instance will be
-            created with *prop*. If *None*, use rc settings.
+        fontsize : int or float or {'xx-small', 'x-small', 'small', 'medium',\
+                   'large', 'x-large', 'xx-large'}
+            Controls the font size of the legend. If the value is numeric the
+            size will be the absolute font size in points. String values are
+            relative to the current default font size. This argument is only
+            used if `prop` is not specified.
 
-          *fontsize*: [size in points | 'xx-small' | 'x-small' | 'small' |
-                      'medium' | 'large' | 'x-large' | 'xx-large']
-            Set the font size.  May be either a size string, relative to
-            the default font size, or an absolute font size in points. This
-            argument is only used if prop is not specified.
+        numpoints : None or int
+            The number of marker points in the legend when creating a legend
+            entry for a line/:class:`matplotlib.lines.Line2D`.
+            Default is ``None`` which will take the value from the
+            ``legend.numpoints`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *numpoints*: integer
-            The number of points in the legend for line
+        scatterpoints : None or int
+            The number of marker points in the legend when creating a legend
+            entry for a scatter plot/
+            :class:`matplotlib.collections.PathCollection`.
+            Default is ``None`` which will take the value from the
+            ``legend.scatterpoints`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *scatterpoints*: integer
-            The number of points in the legend for scatter plot
+        scatteryoffsets : iterable of floats
+            The vertical offset (relative to the font size) for the markers
+            created for a scatter plot legend entry. 0.0 is at the base the
+            legend text, and 1.0 is at the top. To draw all markers at the
+            same height, set to ``[0.5]``. Default ``[0.375, 0.5, 0.3125]``.
 
-          *scatteryoffsets*: list of floats
-            a list of yoffsets for scatter symbols in legend
+        markerscale : None or int or float
+            The relative size of legend markers compared with the originally
+            drawn ones. Default is ``None`` which will take the value from
+            the ``legend.markerscale`` :data:`rcParam <matplotlib.rcParams>`.
 
-          *markerscale*: [ *None* | scalar ]
-            The relative size of legend markers vs. original. If *None*,
-            use rc settings.
+        frameon : None or bool
+            Control whether a frame should be drawn around the legend.
+            Default is ``None`` which will take the value from the
+            ``legend.frameon`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *frameon*: [ *True* | *False* ]
-            if *True*, draw a frame around the legend.
-            The default is set by the rcParam 'legend.frameon'
+        fancybox : None or bool
+            Control whether round edges should be enabled around
+            the :class:`~matplotlib.patches.FancyBboxPatch` which
+            makes up the legend's background.
+            Default is ``None`` which will take the value from the
+            ``legend.fancybox`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *fancybox*: [ *None* | *False* | *True* ]
-            if *True*, draw a frame with a round fancybox.  If *None*,
-            use rc settings
+        shadow : None or bool
+            Control whether to draw a shadow behind the legend.
+            Default is ``None`` which will take the value from the
+            ``legend.shadow`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *shadow*: [ *None* | *False* | *True* ]
-            If *True*, draw a shadow behind legend. If *None*,
-            use rc settings.
+        framealpha : None or float
+            Control the alpha transparency of the legend's frame.
+            Default is ``None`` which will take the value from the
+            ``legend.framealpha`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *framealpha*: [*None* | float]
-            If not None, alpha channel for legend frame. Default *None*.
+        mode : {"expand", None}
+            If `mode` is set to ``"expand"`` the legend will be horizontally
+            expanded to fill the axes area (or `bbox_to_anchor` if defines
+            the legend's size).
 
-          *ncol* : integer
-            number of columns. default is 1
+        bbox_transform : None or :class:`matplotlib.transforms.Transform`
+            The transform for the bounding box (`bbox_to_anchor`). For a value
+            of ``None`` (default) the Axes'
+            :data:`~matplotlib.axes.Axes.transAxes` transform will be used.
 
-          *mode* : [ "expand" | *None* ]
-            if mode is "expand", the legend will be horizontally expanded
-            to fill the axes area (or *bbox_to_anchor*)
+        title : str or None
+            The legend's title. Default is no title (``None``).
 
-          *bbox_to_anchor*: an instance of BboxBase or a tuple of 2 or 4 floats
-            the bbox that the legend will be anchored.
+        borderpad : float or None
+            The fractional whitespace inside the legend border.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.borderpad`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *bbox_transform* : [ an instance of Transform | *None* ]
-            the transform for the bbox. transAxes if *None*.
+        labelspacing : float or None
+            The vertical space between the legend entries.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.labelspacing`` :data:`rcParam<matplotlib.rcParams>`.
 
-          *title* : string
-            the legend title
+        handlelength : float or None
+            The length of the legend handles.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.handlelength`` :data:`rcParam<matplotlib.rcParams>`.
 
-        Padding and spacing between various elements use following
-        keywords parameters. These values are measure in font-size
-        units. e.g., a fontsize of 10 points and a handlelength=5
-        implies a handlelength of 50 points.  Values from rcParams
-        will be used if None.
+        handletextpad : float or None
+            The pad between the legend handle and text.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.handletextpad`` :data:`rcParam<matplotlib.rcParams>`.
 
-        ================   ====================================================
-        Keyword            Description
-        ================   ====================================================
-        borderpad          the fractional whitespace inside the legend border
-        labelspacing       the vertical space between the legend entries
-        handlelength       the length of the legend handles
-        handletextpad      the pad between the legend handle and text
-        borderaxespad      the pad between the axes and legend border
-        columnspacing      the spacing between columns
-        ================   ====================================================
+        borderaxespad : float or None
+            The pad between the axes and legend border.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.borderaxespad`` :data:`rcParam<matplotlib.rcParams>`.
 
-        .. note::
+        columnspacing : float or None
+            The spacing between columns.
+            Measured in font-size units.
+            Default is ``None`` which will take the value from the
+            ``legend.columnspacing`` :data:`rcParam<matplotlib.rcParams>`.
+
+        handler_map : dict or None
+            The custom dictionary mapping instances or types to a legend
+            handler. This `handler_map` updates the default handler map
+            found at :func:`matplotlib.legend.Legend.get_legend_handler_map`.
+
+        Notes
+        -----
 
            Not all kinds of artist are supported by the legend command.
            See :ref:`plotting-guide-legend` for details.
 
-        **Example:**
+        Examples
+        --------
 
         .. plot:: mpl_examples/api/legend_demo.py
 
-        .. seealso::
-            :ref:`plotting-guide-legend`.
-
         """
+        handlers = kwargs.get('handler_map', {}) or {}
 
-        if len(args) == 0:
-            handles, labels = self.get_legend_handles_labels()
-            if len(handles) == 0:
-                warnings.warn("No labeled objects found. "
+        # Support handles and labels being passed as keywords.
+        handles = kwargs.pop('handles', None)
+        labels = kwargs.pop('labels', None)
+
+        if handles is not None and labels is None:
+            labels = [handle.get_label() for handle in handles]
+            for label, handle in zip(labels[:], handles[:]):
+                if label.startswith('_'):
+                    warnings.warn('The handle {!r} has a label of {!r} which '
+                                  'cannot be automatically added to the '
+                                  'legend.'.format(handle, label))
+                    labels.remove(label)
+                    handles.remove(handle)
+
+        elif labels is not None and handles is None:
+            # Get as many handles as there are labels.
+            handles = [handle for handle, _
+                       in zip(self._get_legend_handles(handlers), labels)]
+
+        # No arguments - automatically detect labels and handles.
+        elif len(args) == 0:
+            handles, labels = self.get_legend_handles_labels(handlers)
+            if not handles:
+                warnings.warn("No labelled objects found. "
                               "Use label='...' kwarg on individual plots.")
                 return None
 
+        # One argument. User defined labels - automatic handle detection.
         elif len(args) == 1:
-            # LABELS
-            labels = args[0]
-            handles = [h for h, label in zip(self._get_legend_handles(),
-                                             labels)]
+            labels, = args
+            # Get as many handles as there are labels.
+            handles = [handle for handle, _
+                       in zip(self._get_legend_handles(handlers), labels)]
 
+        # Two arguments. Either:
+        #   * user defined handles and labels
+        #   * user defined labels and location (deprecated)
         elif len(args) == 2:
             if is_string_like(args[1]) or isinstance(args[1], int):
-                # LABELS, LOC
+                cbook.warn_deprecated('1.4', 'The "loc" positional argument '
+                                      'to legend is deprecated. Please use '
+                                      'the "loc" keyword instead.')
                 labels, loc = args
-                handles = [h for h, label in zip(self._get_legend_handles(),
-                                                 labels)]
+                handles = [handle for handle, _
+                           in zip(self._get_legend_handles(handlers), labels)]
                 kwargs['loc'] = loc
             else:
-                # LINES, LABELS
                 handles, labels = args
 
+        # Three arguments. User defined handles, labels and
+        # location (deprecated).
         elif len(args) == 3:
-            # LINES, LABELS, LOC
+            cbook.warn_deprecated('1.4', 'The "loc" positional argument '
+                                         'to legend is deprecated. Please '
+                                         'use the "loc" keyword instead.')
             handles, labels, loc = args
             kwargs['loc'] = loc
-        else:
-            raise TypeError('Invalid arguments to legend')
 
-        # Why do we need to call "flatten" here? -JJL
-        # handles = cbook.flatten(handles)
+        else:
+            raise TypeError('Invalid arguments to legend.')
 
         self.legend_ = mlegend.Legend(self, handles, labels, **kwargs)
+        self.legend_._remove_method = lambda h: setattr(self, 'legend_', None)
         return self.legend_
 
     def text(self, x, y, s, fontdict=None,
@@ -664,8 +720,7 @@ class Axes(_AxesBase):
         yy = self.convert_yunits(y)
         scaley = (yy < ymin) or (yy > ymax)
 
-        trans = mtransforms.blended_transform_factory(
-            self.transAxes, self.transData)
+        trans = self.get_yaxis_transform(which='grid')
         l = mlines.Line2D([xmin, xmax], [y, y], transform=trans, **kwargs)
         self.add_line(l)
         self.autoscale_view(scalex=False, scaley=scaley)
@@ -679,7 +734,7 @@ class Axes(_AxesBase):
         Parameters
         ----------
         x : scalar, optional, default: 0
-            y position in data coordinates of the vertical line.
+            x position in data coordinates of the vertical line.
 
         ymin : scalar, optional, default: 0
             Should be between 0 and 1, 0 being the far left of the plot, 1 the
@@ -731,8 +786,7 @@ class Axes(_AxesBase):
         xx = self.convert_xunits(x)
         scalex = (xx < xmin) or (xx > xmax)
 
-        trans = mtransforms.blended_transform_factory(
-            self.transData, self.transAxes)
+        trans = self.get_xaxis_transform(which='grid')
         l = mlines.Line2D([x, x], [ymin, ymax], transform=trans, **kwargs)
         self.add_line(l)
         self.autoscale_view(scalex=scalex, scaley=False)
@@ -777,8 +831,7 @@ class Axes(_AxesBase):
         .. plot:: mpl_examples/pylab_examples/axhspan_demo.py
 
         """
-        trans = mtransforms.blended_transform_factory(
-            self.transAxes, self.transData)
+        trans = self.get_yaxis_transform(which='grid')
 
         # process the unit information
         self._process_unit_info([xmin, xmax], [ymin, ymax], kwargs=kwargs)
@@ -833,8 +886,7 @@ class Axes(_AxesBase):
             :meth:`axhspan`
                 for example plot and source code
         """
-        trans = mtransforms.blended_transform_factory(
-            self.transData, self.transAxes)
+        trans = self.get_xaxis_transform(which='grid')
 
         # process the unit information
         self._process_unit_info([xmin, xmax], [ymin, ymax], kwargs=kwargs)
@@ -1182,18 +1234,24 @@ class Axes(_AxesBase):
             colls.append(coll)
 
         if len(positions) > 0:
-            minpos = min(position.min() for position in positions)
-            maxpos = max(position.max() for position in positions)
+            # try to get min/max
+            min_max = [(np.min(_p), np.max(_p)) for _p in positions
+                       if len(_p) > 0]
+            # if we have any non-empty positions, try to autoscale
+            if len(min_max) > 0:
+                mins, maxes = zip(*min_max)
+                minpos = np.min(mins)
+                maxpos = np.max(maxes)
 
-            minline = (lineoffsets - linelengths).min()
-            maxline = (lineoffsets + linelengths).max()
+                minline = (lineoffsets - linelengths).min()
+                maxline = (lineoffsets + linelengths).max()
 
-            if colls[0].is_horizontal():
-                corners = (minpos, minline), (maxpos, maxline)
-            else:
-                corners = (minline, minpos), (maxline, maxpos)
-            self.update_datalim(corners)
-            self.autoscale_view()
+                if colls[0].is_horizontal():
+                    corners = (minpos, minline), (maxpos, maxline)
+                else:
+                    corners = (minline, minpos), (maxline, maxpos)
+                self.update_datalim(corners)
+                self.autoscale_view()
 
         return colls
 
@@ -2277,8 +2335,9 @@ class Axes(_AxesBase):
         return stem_container
 
     def pie(self, x, explode=None, labels=None, colors=None,
-            autopct=None, pctdistance=0.6, shadow=False,
-            labeldistance=1.1, startangle=None, radius=None):
+            autopct=None, pctdistance=0.6, shadow=False, labeldistance=1.1,
+            startangle=None, radius=None, counterclock=True,
+            wedgeprops=None, textprops=None):
         r"""
         Plot a pie chart.
 
@@ -2287,7 +2346,9 @@ class Axes(_AxesBase):
           pie(x, explode=None, labels=None,
               colors=('b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'),
               autopct=None, pctdistance=0.6, shadow=False,
-              labeldistance=1.1, startangle=None, radius=None)
+              labeldistance=1.1, startangle=None, radius=None,
+              counterclock=True, wedgeprops=None, textprops=None,
+              )
 
         Make a pie chart of array *x*.  The fractional area of each
         wedge is given by x/sum(x).  If sum(x) <= 1, then the values
@@ -2331,6 +2392,18 @@ class Axes(_AxesBase):
 
           *radius*: [ *None* | scalar ]
           The radius of the pie, if *radius* is *None* it will be set to 1.
+
+          *counterclock*: [ *False* | *True* ]
+            Specify fractions direction, clockwise or counterclockwise.
+
+          *wedgeprops*: [ *None* | dict of key value pairs ]
+            Dict of arguments passed to the wedge objects making the pie.
+            For example, you can pass in wedgeprops = { 'linewidth' : 3 }
+            to set the width of the wedge border lines equal to 3.
+            For more details, look at the doc/arguments of the wedge object.
+
+          *textprops*: [ *None* | dict of key value pairs ]
+            Dict of arguments to pass to the text objects.
 
         The pie chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.  e.g.::
@@ -2384,6 +2457,11 @@ class Axes(_AxesBase):
         else:
             theta1 = startangle / 360.0
 
+        if wedgeprops is None:
+            wedgeprops = {}
+        if textprops is None:
+            textprops = {}
+
         texts = []
         slices = []
         autotexts = []
@@ -2391,13 +2469,15 @@ class Axes(_AxesBase):
         i = 0
         for frac, label, expl in cbook.safezip(x, labels, explode):
             x, y = center
-            theta2 = theta1 + frac
+            theta2 = (theta1 + frac) if counterclock else (theta1 - frac)
             thetam = 2 * math.pi * 0.5 * (theta1 + theta2)
             x += expl * math.cos(thetam)
             y += expl * math.sin(thetam)
 
-            w = mpatches.Wedge((x, y), radius, 360. * theta1, 360. * theta2,
-                               facecolor=colors[i % len(colors)])
+            w = mpatches.Wedge((x, y), radius, 360. * min(theta1, theta2),
+                            360. * max(theta1, theta2),
+                            facecolor=colors[i % len(colors)],
+                            **wedgeprops)
             slices.append(w)
             self.add_patch(w)
             w.set_label(label)
@@ -2421,7 +2501,8 @@ class Axes(_AxesBase):
             t = self.text(xt, yt, label,
                           size=rcParams['xtick.labelsize'],
                           horizontalalignment=label_alignment,
-                          verticalalignment='center')
+                          verticalalignment='center',
+                          **textprops)
 
             texts.append(t)
 
@@ -2438,7 +2519,9 @@ class Axes(_AxesBase):
 
                 t = self.text(xt, yt, s,
                               horizontalalignment='center',
-                              verticalalignment='center')
+                              verticalalignment='center',
+                              **textprops)
+
                 autotexts.append(t)
 
             theta1 = theta2
@@ -2519,7 +2602,9 @@ class Axes(_AxesBase):
             These arguments can be used to indicate that a value gives
             only upper/lower limits. In that case a caret symbol is
             used to indicate this. lims-arguments may be of the same
-            type as *xerr* and *yerr*.
+            type as *xerr* and *yerr*.  To use limits with inverted
+            axes, :meth:`set_xlim` or :meth:`set_ylim` must be called
+            before :meth:`errorbar`.
 
           *errorevery*: positive integer
             subsamples the errorbars. e.g., if everyerror=5, errorbars for
@@ -2599,16 +2684,12 @@ class Axes(_AxesBase):
         if elinewidth:
             lines_kw['linewidth'] = elinewidth
         else:
-            if 'linewidth' in kwargs:
-                lines_kw['linewidth'] = kwargs['linewidth']
-            if 'lw' in kwargs:
-                lines_kw['lw'] = kwargs['lw']
-        if 'transform' in kwargs:
-            lines_kw['transform'] = kwargs['transform']
-        if 'alpha' in kwargs:
-            lines_kw['alpha'] = kwargs['alpha']
-        if 'zorder' in kwargs:
-            lines_kw['zorder'] = kwargs['zorder']
+            for key in ('linewidth', 'lw'):
+                if key in kwargs:
+                    lines_kw[key] = kwargs[key]
+        for key in ('transform', 'alpha', 'zorder'):
+            if key in kwargs:
+                lines_kw[key] = kwargs[key]
 
         # arrays fine here, they are booleans and hence not units
         if not iterable(lolims):
@@ -2644,29 +2725,21 @@ class Axes(_AxesBase):
             ys = [thisy for thisy, b in zip(ys, mask) if b]
             return xs, ys
 
+        plot_kw = {'label': '_nolegend_'}
         if capsize > 0:
-            plot_kw = {
-                'ms': 2 * capsize,
-                'label': '_nolegend_'}
-            if capthick is not None:
-                # 'mew' has higher priority, I believe,
-                # if both 'mew' and 'markeredgewidth' exists.
-                # So, save capthick to markeredgewidth so that
-                # explicitly setting mew or markeredgewidth will
-                # over-write capthick.
-                plot_kw['markeredgewidth'] = capthick
-            # For backwards-compat, allow explicit setting of
-            # 'mew' or 'markeredgewidth' to over-ride capthick.
-            if 'markeredgewidth' in kwargs:
-                plot_kw['markeredgewidth'] = kwargs['markeredgewidth']
-            if 'mew' in kwargs:
-                plot_kw['mew'] = kwargs['mew']
-            if 'transform' in kwargs:
-                plot_kw['transform'] = kwargs['transform']
-            if 'alpha' in kwargs:
-                plot_kw['alpha'] = kwargs['alpha']
-            if 'zorder' in kwargs:
-                plot_kw['zorder'] = kwargs['zorder']
+            plot_kw['ms'] = 2. * capsize
+        if capthick is not None:
+            # 'mew' has higher priority, I believe,
+            # if both 'mew' and 'markeredgewidth' exists.
+            # So, save capthick to markeredgewidth so that
+            # explicitly setting mew or markeredgewidth will
+            # over-write capthick.
+            plot_kw['markeredgewidth'] = capthick
+        # For backwards-compat, allow explicit setting of
+        # 'mew' or 'markeredgewidth' to over-ride capthick.
+        for key in ('markeredgewidth', 'mew', 'transform', 'alpha', 'zorder'):
+            if key in kwargs:
+                plot_kw[key] = kwargs[key]
 
         if xerr is not None:
             if (iterable(xerr) and len(xerr) == 2 and
@@ -2683,38 +2756,48 @@ class Axes(_AxesBase):
                 right = [thisx + thiserr for (thisx, thiserr)
                          in cbook.safezip(x, xerr)]
 
-            yo, _ = xywhere(y, right, everymask)
-            lo, ro = xywhere(left, right, everymask)
-            barcols.append(self.hlines(yo, lo, ro, **lines_kw))
-            if capsize > 0:
-                if xlolims.any():
-                    # can't use numpy logical indexing since left and
-                    # y are lists
-                    leftlo, ylo = xywhere(left, y, xlolims & everymask)
+            # select points without upper/lower limits in x and
+            # draw normal errorbars for these points
+            noxlims = ~(xlolims | xuplims)
+            if noxlims.any():
+                yo, _ = xywhere(y, right, noxlims & everymask)
+                lo, ro = xywhere(left, right, noxlims & everymask)
+                barcols.append(self.hlines(yo, lo, ro, **lines_kw))
+                if capsize > 0:
+                    caplines.extend(self.plot(lo, yo, 'k|', **plot_kw))
+                    caplines.extend(self.plot(ro, yo, 'k|', **plot_kw))
 
-                    caplines.extend(
-                        self.plot(leftlo, ylo, ls='None',
-                                  marker=mlines.CARETLEFT, **plot_kw))
-                    xlolims = ~xlolims
-                    leftlo, ylo = xywhere(left, y, xlolims & everymask)
-                    caplines.extend(self.plot(leftlo, ylo, 'k|', **plot_kw))
+            if xlolims.any():
+                yo, _ = xywhere(y, right, xlolims & everymask)
+                lo, ro = xywhere(x, right, xlolims & everymask)
+                barcols.append(self.hlines(yo, lo, ro, **lines_kw))
+                rightup, yup = xywhere(right, y, xlolims & everymask)
+                if self.xaxis_inverted():
+                    marker = mlines.CARETLEFT
                 else:
+                    marker = mlines.CARETRIGHT
+                caplines.extend(
+                    self.plot(rightup, yup, ls='None', marker=marker,
+                              **plot_kw))
+                if capsize > 0:
+                    xlo, ylo = xywhere(x, y, xlolims & everymask)
+                    caplines.extend(self.plot(xlo, ylo, 'k|', **plot_kw))
 
-                    leftlo, ylo = xywhere(left, y, everymask)
-                    caplines.extend(self.plot(leftlo, ylo, 'k|', **plot_kw))
-
-                if xuplims.any():
-
-                    rightup, yup = xywhere(right, y, xuplims & everymask)
-                    caplines.extend(
-                        self.plot(rightup, yup, ls='None',
-                                  marker=mlines.CARETRIGHT, **plot_kw))
-                    xuplims = ~xuplims
-                    rightup, yup = xywhere(right, y, xuplims & everymask)
-                    caplines.extend(self.plot(rightup, yup, 'k|', **plot_kw))
+            if xuplims.any():
+                yo, _ = xywhere(y, right, xuplims & everymask)
+                lo, ro = xywhere(left, x, xuplims & everymask)
+                barcols.append(self.hlines(yo, lo, ro, **lines_kw))
+                leftlo, ylo = xywhere(left, y, xuplims & everymask)
+                if self.xaxis_inverted():
+                    marker = mlines.CARETRIGHT
                 else:
-                    rightup, yup = xywhere(right, y, everymask)
-                    caplines.extend(self.plot(rightup, yup, 'k|', **plot_kw))
+                    marker = mlines.CARETLEFT
+                caplines.extend(
+                    self.plot(leftlo,  ylo, ls='None', marker=marker,
+                              **plot_kw))
+                if capsize > 0:
+                    xup, yup = xywhere(x, y, xuplims & everymask)
+                    caplines.extend(self.plot(xup, yup, 'k|', **plot_kw))
 
         if yerr is not None:
             if (iterable(yerr) and len(yerr) == 2 and
@@ -2731,35 +2814,48 @@ class Axes(_AxesBase):
                 upper = [thisy + thiserr for (thisy, thiserr)
                          in cbook.safezip(y, yerr)]
 
-            xo, _ = xywhere(x, lower, everymask)
-            lo, uo = xywhere(lower, upper, everymask)
-            barcols.append(self.vlines(xo, lo, uo, **lines_kw))
-            if capsize > 0:
+            # select points without upper/lower limits in y and
+            # draw normal errorbars for these points
+            noylims = ~(lolims | uplims)
+            if noylims.any():
+                xo, _ = xywhere(x, lower, noylims & everymask)
+                lo, uo = xywhere(lower, upper, noylims & everymask)
+                barcols.append(self.vlines(xo, lo, uo, **lines_kw))
+                if capsize > 0:
+                    caplines.extend(self.plot(xo, lo, 'k_', **plot_kw))
+                    caplines.extend(self.plot(xo, uo, 'k_', **plot_kw))
 
-                if lolims.any():
-                    xlo, lowerlo = xywhere(x, lower, lolims & everymask)
-                    caplines.extend(
-                        self.plot(xlo, lowerlo, ls='None',
-                                  marker=mlines.CARETDOWN, **plot_kw))
-                    lolims = ~lolims
-                    xlo, lowerlo = xywhere(x, lower, lolims & everymask)
-                    caplines.extend(self.plot(xlo, lowerlo, 'k_', **plot_kw))
+            if lolims.any():
+                xo, _ = xywhere(x, lower, lolims & everymask)
+                lo, uo = xywhere(y, upper, lolims & everymask)
+                barcols.append(self.vlines(xo, lo, uo, **lines_kw))
+                xup, upperup = xywhere(x, upper, lolims & everymask)
+                if self.yaxis_inverted():
+                    marker = mlines.CARETDOWN
                 else:
-                    xlo, lowerlo = xywhere(x, lower, everymask)
-                    caplines.extend(self.plot(xlo, lowerlo, 'k_', **plot_kw))
+                    marker = mlines.CARETUP
+                caplines.extend(
+                    self.plot(xup, upperup, ls='None', marker=marker,
+                              **plot_kw))
+                if capsize > 0:
+                    xlo, ylo = xywhere(x, y, lolims & everymask)
+                    caplines.extend(self.plot(xlo, ylo, 'k_', **plot_kw))
 
-                if uplims.any():
-                    xup, upperup = xywhere(x, upper, uplims & everymask)
-
-                    caplines.extend(
-                        self.plot(xup, upperup, ls='None',
-                                  marker=mlines.CARETUP, **plot_kw))
-                    uplims = ~uplims
-                    xup, upperup = xywhere(x, upper, uplims & everymask)
-                    caplines.extend(self.plot(xup, upperup, 'k_', **plot_kw))
+            if uplims.any():
+                xo, _ = xywhere(x, lower, uplims & everymask)
+                lo, uo = xywhere(lower, y, uplims & everymask)
+                barcols.append(self.vlines(xo, lo, uo, **lines_kw))
+                xlo, lowerlo = xywhere(x, lower, uplims & everymask)
+                if self.yaxis_inverted():
+                    marker = mlines.CARETUP
                 else:
-                    xup, upperup = xywhere(x, upper, everymask)
-                    caplines.extend(self.plot(xup, upperup, 'k_', **plot_kw))
+                    marker = mlines.CARETDOWN
+                caplines.extend(
+                    self.plot(xlo, lowerlo, ls='None', marker=marker,
+                              **plot_kw))
+                if capsize > 0:
+                    xup, yup = xywhere(x, y, uplims & everymask)
+                    caplines.extend(self.plot(xup, yup, 'k_', **plot_kw))
 
         if not barsabove and fmt is not None:
             l0, = self.plot(x, y, fmt, **kwargs)
@@ -2928,14 +3024,14 @@ class Axes(_AxesBase):
             - whiskers: the vertical lines extending to the most extreme,
               n-outlier data points.
             - caps: the horizontal lines at the ends of the whiskers.
-            - fliers: points representing data that extend beyone the
+            - fliers: points representing data that extend beyond the
               whiskers (outliers).
             - means: points or lines representing the means.
 
         Examples
         --------
 
-        .. plot:: examples/statistics/boxplot_demo.py
+        .. plot:: mpl_examples/statistics/boxplot_demo.py
         """
         bxpstats = cbook.boxplot_stats(x, whis=whis, bootstrap=bootstrap,
                                        labels=labels)
@@ -3094,7 +3190,7 @@ class Axes(_AxesBase):
         Examples
         --------
 
-        .. plot:: examples/statistics/bxp_demo.py
+        .. plot:: mpl_examples/statistics/bxp_demo.py
         """
         # lists of artists to be output
         whiskers = []
@@ -3887,8 +3983,7 @@ class Axes(_AxesBase):
             values.append(val)
 
         values = np.array(values)
-        trans = mtransforms.blended_transform_factory(
-            self.transData, self.transAxes)
+        trans = self.get_xaxis_transform(which='grid')
 
         hbar = mcoll.PolyCollection(verts, transform=trans, edgecolors='face')
 
@@ -3917,8 +4012,7 @@ class Axes(_AxesBase):
 
         values = np.array(values)
 
-        trans = mtransforms.blended_transform_factory(
-            self.transAxes, self.transData)
+        trans = self.get_yaxis_transform(which='grid')
 
         vbar = mcoll.PolyCollection(verts, transform=trans, edgecolors='face')
         vbar.set_array(values)
@@ -3987,8 +4081,8 @@ class Axes(_AxesBase):
         if not self._hold:
             self.cla()
         q = mquiver.Quiver(self, *args, **kw)
-        self.add_collection(q, False)
-        self.update_datalim(q.XY)
+
+        self.add_collection(q, True)
         self.autoscale_view()
         return q
     quiver.__doc__ = mquiver.Quiver.quiver_doc
@@ -4029,7 +4123,6 @@ class Axes(_AxesBase):
             self.cla()
         b = mquiver.Barbs(self, *args, **kw)
         self.add_collection(b)
-        self.update_datalim(b.get_offsets())
         self.autoscale_view()
         return b
 
@@ -4614,6 +4707,9 @@ class Axes(_AxesBase):
           *alpha*: ``0 <= scalar <= 1``   or *None*
             the alpha blending value
 
+          *snap*: bool
+            Whether to snap the mesh to pixel boundaries.
+
         Return value is a :class:`matplotlib.collections.Collection`
         instance.
 
@@ -4762,6 +4858,8 @@ class Axes(_AxesBase):
         if 'antialiaseds' not in kwargs and (is_string_like(ec) and
                 ec.lower() == "none"):
             kwargs['antialiaseds'] = False
+
+        kwargs.setdefault('snap', False)
 
         collection = mcoll.PolyCollection(verts, **kwargs)
 
@@ -5236,7 +5334,7 @@ class Axes(_AxesBase):
             (instead of 1).  If `normed` is True, the weights are normalized,
             so that the integral of the density over the range remains 1.
 
-        cumulative : boolean, optional, default : True
+        cumulative : boolean, optional, default : False
             If `True`, then a histogram is computed where each bin gives the
             counts in that bin plus all bins for smaller values. The last bin
             gives the total number of datapoints.  If `normed` is also `True`
@@ -5587,10 +5685,11 @@ class Axes(_AxesBase):
                 if log:
                     y[y < minimum] = minimum
                 if orientation == 'horizontal':
-                    x, y = y, x
-
-                xvals.append(x.copy())
-                yvals.append(y.copy())
+                    xvals.append(y.copy())
+                    yvals.append(x.copy())
+                else:
+                    xvals.append(x.copy())
+                    yvals.append(y.copy())
 
             if fill:
                 # add patches in reverse order so that when stacking,
@@ -5740,7 +5839,9 @@ class Axes(_AxesBase):
         -----
         Rendering the histogram with a logarithmic color scale is
         accomplished by passing a :class:`colors.LogNorm` instance to
-        the *norm* keyword argument.
+        the *norm* keyword argument. Likewise, power-law normalization
+        (similar in effect to gamma correction) can be accomplished with
+        :class:`colors.PowerNorm`.
 
         Examples
         --------
@@ -6917,5 +7018,5 @@ class Axes(_AxesBase):
     tripcolor.__doc__ = mtri.tripcolor.__doc__
 
     def triplot(self, *args, **kwargs):
-        mtri.triplot(self, *args, **kwargs)
+        return mtri.triplot(self, *args, **kwargs)
     triplot.__doc__ = mtri.triplot.__doc__
